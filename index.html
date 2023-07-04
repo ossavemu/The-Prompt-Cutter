@@ -1,0 +1,121 @@
+<!DOCTYPE html> <html lang=“en”>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>The Prompt Cutter</title>
+        <link
+            href="https://bootswatch.com/5/quartz/bootstrap.min.css"
+            rel="stylesheet"
+            crossorigin="anonymous">
+        <script
+            src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"
+            integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz"
+            crossorigin="anonymous"></script>
+    </head>
+
+    <body>
+        <main>
+            <div class="alert alert-dismissible alert-success m-3">
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <strong>Welcome to the Prompt Cutter 🗡️</strong> a web app that
+                helps you split your long texts into smaller fragments of 4000
+                characters each. This is useful for tasks that have a limit on
+                the text length, such as writing prompts, summaries, captions,
+                tweets, etc. <strong>It is also especially useful for analyzing
+                    long texts in Bing AI or other state-of-the-art chatbots
+                    that require short inputs.</strong> You can also copy or
+                download each fragment easily with a single click. If you click
+                on a cut text fragment, it will copy the exact 4000 characters
+                to the clipboard! The Prompt Cutter by <a
+                    href="https://github.com/ossavemu"
+                    class="alert-link">Oscar Velez 🟨🟦🟥</a> Enjoy using this
+                app and feel free to share your feedback. 😊
+            </div>
+            <div class="container-lg mt-5">
+                <div class="form-floating">
+                    <h3>Enter your text here:</h3>
+                    <textarea class="form-control form-control-lg"
+                        id="floatingTextarea" style="width: 75vw; height: 30vh;"></textarea>
+                    <div class="mt-3">
+                        <!-- I added a check icon to the button -->
+                        <button type="button" class="btn btn-success"><i
+                                class="bi bi-check-lg"></i> Process</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+        <script>
+            $(document).ready(function () {
+                // Check if there is any stored information and show it in the text area
+                var storedText = localStorage.getItem("text");
+                if (storedText) {
+                    $("#floatingTextarea").val(storedText);
+                }
+                // Capture the information from the textarea when the button is clicked
+                $("button").click(function () {
+                    var text = $("#floatingTextarea").val();
+    
+                    // Erase the jump lines and the unnecessary spaces in the information
+                    var trimmedText = text.replace(/\s+/g, " ").trim();
+    
+                    // Returns the information in the textarea in arrays of 4000 characters
+                    var textArray = [];
+                    while (trimmedText.length > 0) {
+                        textArray.push(trimmedText.substring(0, 4000));
+                        trimmedText = trimmedText.substring(4000);
+                    }
+    
+                    // Show each array in a <div class="card"><div class="card-body">text of 4000 characters</div></div>
+                    for (let i = 0; i < textArray.length; i++) {
+                        var card = $("<div>").addClass("card").addClass("m-3").css("cursor", "pointer");
+                        var cardBody = $("<div>").addClass("card-body").text(textArray[i]);
+                        card.append(cardBody);
+    
+                        // Creating new cards elements on the dom
+                        $("main").append(card);
+    
+                        // The cards must have a method to be copied to the clipboard
+                        card.click(function () {
+                            var range = document.createRange();
+                            range.selectNode(this);
+                            window.getSelection().removeAllRanges();
+                            window.getSelection().addRange(range);
+                            document.execCommand("copy");
+                            window.getSelection().removeAllRanges();
+                            alert(`Fragment ${i+1} Copied to clipboard!`);
+                        });
+                    }
+    
+                    // Create a download link for each fragment
+                    var downloadLinksContainer = $("<div>").addClass("d-flex justify-content-center");
+                    for (let i = 0; i < textArray.length; i++) {
+                        var downloadLink = $("<a>").addClass("mx-3").attr("href", "data:text/plain;charset=utf-8," + encodeURIComponent(textArray[i]))
+                            .attr("download", "text" + (i + 1) + ".txt")
+                            .text("Download fragment " + (i + 1));
+                        downloadLinksContainer.append(downloadLink);
+                    }
+                    $("main").prepend(downloadLinksContainer);
+    
+                    // Show a message about the number of fragments of 4000 characters
+                    var numFragments = textArray.length;
+                    var message = $("<strong>").text("Your text has been split into " + numFragments + " fragments of 4000 characters each.")
+                        .addClass("my-3 d-block text-center").css("font-size", "1.5rem");
+                    $("main").prepend(message);
+    
+                    // Store the information in local storage
+                    localStorage.setItem("text", text);
+                });
+    
+                // Check if there is any stored information and show it in the text area
+                var storedText = localStorage.getItem("text");
+                if (storedText) {
+                    $("#floatingTextarea").val(storedText);
+                }
+            });
+        </script>
+
+    </body>
+
+</html>
